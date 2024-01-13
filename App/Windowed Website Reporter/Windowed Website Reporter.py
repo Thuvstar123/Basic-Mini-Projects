@@ -101,23 +101,24 @@ layout=[[sg.Push(),sg.Image("cross.png",key="CLOSE",enable_events=True)],
         [sg.Text("Website Reporter",key="TEXT",expand_x=True),sg.Text("Update",key="LIST_TOTAL",expand_x=True,visible=False)],
         [sg.Input("Enter URL",key="INPUT",expand_x=True)],
         [sg.Button("Enter",expand_x=True),sg.Button("New day",expand_x=True)],
-        [sg.Text("Already Reported",key="REPORTED",visible=False)]
+        [sg.Text("Already Reported",key="REPORTED",visible=False)],
+        [sg.Button("Done",key="DONE",expand_x=True,expand_y=True)]
         ]
 
-window=sg.Window("Website Reporter",layout,no_titlebar=True,size=(400,300),grab_anywhere=True)
+window=sg.Window("Website Reporter",layout,no_titlebar=True,size=(400,200),grab_anywhere=True)
 
 while True:
     event,value=window.read()
 
-    if event==sg.WIN_CLOSED:
-        break
-    elif event=="CLOSE":
-        sg.popup("Net URL count:"+str(url_list_tot)+"\nCurrent URL count:"+str(url_save_tot))
-        time.sleep(1)
-        window.close()
+    match event:
+        case sg.WIN_CLOSED:
+            break
+        case "CLOSE":
+            sg.popup("Net URL count:"+str(url_list_tot)+"\nCurrent URL count:"+str(url_save_tot))
+            time.sleep(1)
+            window.close()
 
-    if event=="Enter":
-        if value["INPUT"]!="STOP":
+        case "Enter":
             window["TEXT"].update("URL: "+value["INPUT"])
             url_input=str(value["INPUT"])
             if repeat_check()!="Reported":
@@ -127,11 +128,15 @@ while True:
                 read_content()
             else:
                 window["REPORTED"].update(visible=True)
-        else:
-            break
 
-    if event=="New day":
-        websave_create()
-        read_content()
+        case "New day":
+            websave_create()
+            read_content()
+
+        case "DONE":
+            #--REQUIRED-- Make the "\" into "/", when entering the path.
+            command=["python","<PATH TO WEB AUTOMATOR>/Web Automation.py"]
+            subprocess.run(command,capture_output=False,text=True)
 
 close_file()
+
